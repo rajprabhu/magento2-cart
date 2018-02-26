@@ -83,14 +83,10 @@ class Product extends \Magento\Customer\Controller\AbstractAccount
             $productId = (int) $this->getRequest()->getParam('id');
             $qty=1;
             $storeId = $this->storeManager->getStore()->getId();
-            
             $quote = $this->customerSession->getQuote();
             $product = $this->product->getById($productId, false, $storeId, true);
-            
             $quote->addProduct($product, $qty);
-            
             $this->cart->save($quote);
-            
             $this->messageManager->addSuccess(__('%1 is added in your cart', $product->getName()));
         } 
 
