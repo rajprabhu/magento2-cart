@@ -4,7 +4,7 @@ namespace Raj\Cart\Controller\Add;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Controller\ResultFactory;
 
-class Product extends \Magento\Customer\Controller\AbstractAccount
+class Product extends \Magento\Framework\App\Action\Action 
 {
 
 
@@ -84,10 +84,20 @@ class Product extends \Magento\Customer\Controller\AbstractAccount
             $qty=1;
             $storeId = $this->storeManager->getStore()->getId();
             $quote = $this->customerSession->getQuote();
+            if (!$quote){
+              return;
+            }
             $product = $this->product->getById($productId, false, $storeId, true);
+            
             $quote->addProduct($product, $qty);
+            $quote->getBillingAddress();
+            $quote->getShippingAddress()->setCollectShippingRates(true);
+            $quote->collectTotals();
             $this->cart->save($quote);
+            $this->customerSession->setQuoteId($quote->getId());
             $this->messageManager->addSuccess(__('%1 is added in your cart', $product->getName()));
+           
+           
         } 
 
         catch (\Exception $e) {
