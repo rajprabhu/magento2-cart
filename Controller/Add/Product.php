@@ -84,11 +84,7 @@ class Product extends \Magento\Framework\App\Action\Action
             $qty=1;
             $storeId = $this->storeManager->getStore()->getId();
             $quote = $this->customerSession->getQuote();
-            if (!$quote){
-              return;
-            }
             $product = $this->product->getById($productId, false, $storeId, true);
-            
             $quote->addProduct($product, $qty);
             $quote->getBillingAddress();
             $quote->getShippingAddress()->setCollectShippingRates(true);
@@ -96,8 +92,7 @@ class Product extends \Magento\Framework\App\Action\Action
             $this->cart->save($quote);
             $this->customerSession->setQuoteId($quote->getId());
             $this->messageManager->addSuccess(__('%1 is added in your cart', $product->getName()));
-           
-           
+          
         } 
 
         catch (\Exception $e) {
