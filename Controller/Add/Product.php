@@ -47,6 +47,7 @@ class Product extends \Magento\Framework\App\Action\Action
      * @param Context $context            
      * @param ResultFactory $result
      * @param \Magento\Quote\Api\CartRepositoryInterface $cart
+     * @param \Magento\Quote\Model\Quote\ItemFactory $cartItem
      * @param \Magento\Catalog\Api\ProductRepositoryInterface $product 
      * @param \Magento\Checkout\Model\Session $customerSession 
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager            
