@@ -20,6 +20,7 @@ class Product extends \Magento\Framework\App\Action\Action
      * @var \Magento\Quote\Api\CartRepositoryInterface
      */
     protected $cart;
+    protected $cartItem;
 
     /**
      *
@@ -53,20 +54,24 @@ class Product extends \Magento\Framework\App\Action\Action
     public function __construct(Context $context, 
         ResultFactory $result, 
         \Magento\Quote\Api\CartRepositoryInterface $cart,
+        \Magento\Quote\Model\Quote\ItemFactory $cartItem,
+        //\Magento\Quote\Api\Data\CartItemInterfaceFactory $cartItem,
         \Magento\Catalog\Api\ProductRepositoryInterface $product, 
         \Magento\Checkout\Model\Session $customerSession, 
-        \Magento\Store\Model\StoreManagerInterface $storeManager
-        
+        \Magento\Store\Model\StoreManagerInterface $storeManager,
+        \Magento\Framework\View\Result\PageFactory $resultPage
         )
     
     {
         parent::__construct($context);
         
-        $this->result = $result;
+      
         $this->storeManager = $storeManager;
         $this->product = $product;
         $this->cart = $cart;
+        $this->cartItem = $cartItem;
         $this->customerSession = $customerSession;
+        $this->result=$result;
     }
 
     /**
@@ -85,12 +90,17 @@ class Product extends \Magento\Framework\App\Action\Action
             $storeId = $this->storeManager->getStore()->getId();
             $quote = $this->customerSession->getQuote();
             $product = $this->product->getById($productId, false, $storeId, true);
-            $quote->addProduct($product, $qty);
+            $quoteItem = $this->cartItem->create();
+            $quoteItem->setProduct($product);
+            $quoteItem->setQuote($quote);
+            $quoteItem->setQty($qty);
+            $quote->addItem($quoteItem);
             $quote->getBillingAddress();
             $quote->getShippingAddress()->setCollectShippingRates(true);
             $quote->collectTotals();
             $this->cart->save($quote);
             $this->customerSession->setQuoteId($quote->getId());
+            $this->customerSession->setLastAddedProductId($productId);
             $this->messageManager->addSuccess(__('%1 is added in your cart', $product->getName()));
           
         } 
@@ -103,5 +113,6 @@ class Product extends \Magento\Framework\App\Action\Action
         $resultRedirect = $this->result->create(ResultFactory::TYPE_REDIRECT);
         $resultRedirect->setPath('checkout/cart/');
         return $resultRedirect;
+       
     }
 }
